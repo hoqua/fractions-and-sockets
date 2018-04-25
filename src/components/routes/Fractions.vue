@@ -48,7 +48,7 @@
 
   export default {
     name: 'fractions',
-    data () {
+    data() {
       return {
         inputSetUp: {maxWidth: '960px', minWidth: '20px', comfortZone: 0},
         isError: false,
@@ -64,32 +64,15 @@
           denominator: null,
           operator: {
             symbol: null,
-            priority: 0,
+            priority: null,
             operation: null
           }
         },
-        fractionsList: [
-          {
-            numerator: null,
-            denominator: null,
-            operator: {
-              symbol: null,
-              priority: null
-            }
-          },
-          {
-            numerator: null,
-            denominator: null,
-            operator: {
-              symbol: null,
-              priority: 0
-            }
-          }
-        ]
+        fractionsList: []
       }
     },
     computed: {
-      calculationResult () {
+      calculationResult() {
         let arrayCopy = JSON.parse(JSON.stringify(this.fractionsList))
 
         const calculateByPriority = (arrayCopy) => {
@@ -113,7 +96,6 @@
           } catch (e) {
             return {isError: true}
           }
-
         }
 
         const findIndexByPriority = (currentPriority) => {
@@ -130,19 +112,23 @@
       }
     },
     methods: {
-      createFraction (numerator, denominator) {
+      createFraction(numerator, denominator) {
         return new Fraction(Number(numerator), Number(denominator))
       },
-      processAndValidateOperator (index, value) {
+      processAndValidateOperator(index, value) {
         const foundedOperator = this.validOperatorsList.find(el => el.symbol === value)
         this.fractionsList[index].operator = foundedOperator !== undefined ? foundedOperator : {
           symbol: null,
           priority: 0
         }
       },
-      addNewFraction () {
+      addNewFraction() {
         this.fractionsList.push(Object.assign({}, this.fractionMockup))
       }
+    },
+    created() {
+      this.addNewFraction()
+      this.addNewFraction()
     }
   }
 </script>
@@ -171,7 +157,8 @@
     position: absolute;
     bottom: 20px;
   }
-  .equals{
+
+  .equals {
     height: 10px;
     width: 15px;
     margin: 0 10px;
