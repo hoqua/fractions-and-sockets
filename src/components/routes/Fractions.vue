@@ -26,8 +26,20 @@
         />
       </div>
     </div>
-    <p v-if="!isError">{{den}} {{num}}</p>
-    <p v-if="isError">Provide valid values please</p>
+    <div class="equals"></div>
+    <div class="text-align-center">
+      <input type="text"
+             v-autowidth="inputSetUp"
+             :value="!calculationResult.isError ? calculationResult.num : null"
+             placeholder="Value"
+      />
+      <hr>
+      <input type="text"
+             v-autowidth="inputSetUp"
+             :value="!calculationResult.isError ? calculationResult.num : null"
+             placeholder="Value"
+      />
+    </div>
   </div>
 </template>
 
@@ -35,12 +47,10 @@
   import {Fraction} from 'fractional'
 
   export default {
-    name: "fractions",
-    data() {
+    name: 'fractions',
+    data () {
       return {
         inputSetUp: {maxWidth: '960px', minWidth: '20px', comfortZone: 0},
-        den: '',
-        nom: '',
         isError: false,
         highestPriority: 1,
         validOperatorsList: [
@@ -50,85 +60,88 @@
           {symbol: '-', operation: 'subtract', priority: 0}
         ],
         fractionMockup: {
-          numerator: 1,
-          denominator: 1,
+          numerator: null,
+          denominator: null,
           operator: {
-            symbol: '*', operation: 'multiply', priority: 1
+            symbol: null,
+            priority: 0,
+            operation: null
           }
         },
         fractionsList: [
           {
-            numerator: 1,
-            denominator: 1,
+            numerator: null,
+            denominator: null,
             operator: {
-              symbol: null
+              symbol: null,
+              priority: null
             }
           },
           {
-            numerator: 1,
-            denominator: 1,
+            numerator: null,
+            denominator: null,
             operator: {
-              symbol: '*', operation: 'multiply', priority: 1
+              symbol: null,
+              priority: 0
             }
           }
-        ],
+        ]
       }
     },
-    computed: {},
-    methods: {
-      calculationResult(fractionsArray) {
-        const self = this
-        let priority = this.highestPriority
-        console.log(fractionsArray)
-        let arrayCopy = JSON.parse(JSON.stringify(fractionsArray))
-        function calculateByPriority(arrayCopy) {
-          let isErrorInCalculation = false
+    computed: {
+      calculationResult () {
+        let arrayCopy = JSON.parse(JSON.stringify(this.fractionsList))
+
+        const calculateByPriority = (arrayCopy) => {
+          const indexOfRightElement = findIndexByPriority(this.highestPriority)
+          const indexOfLeftElement = indexOfRightElement - 1
+          const leftElement = arrayCopy[indexOfLeftElement]
+          const rightElement = arrayCopy[indexOfRightElement]
           try {
-            const indexOfRightElement = arrayCopy.findIndex(el => el.operator.priority === priority)
-            indexOfRightElement === -1 ? priority - 1 : null
-            const indexOfLeftElement = indexOfRightElement !== 0 ? indexOfRightElement - 1 : 0
-            const leftElement = arrayCopy[indexOfLeftElement]
-            const rightElement = arrayCopy[indexOfRightElement]
-            const leftFraction = self.createFraction(leftElement.numerator, leftElement.denominator)
-            const rightFraction = self.createFraction(rightElement.numerator, rightElement.denominator)
+            const leftFraction = this.createFraction(leftElement.numerator, leftElement.denominator)
+            const rightFraction = this.createFraction(rightElement.numerator, rightElement.denominator)
             const resultOfExpression = (leftFraction)[rightElement.operator.operation](rightFraction)
             arrayCopy[indexOfLeftElement].numerator = resultOfExpression.numerator
             arrayCopy[indexOfLeftElement].denominator = resultOfExpression.denominator
-            arrayCopy.splice(indexOfLeftElement, 1)
+            arrayCopy.splice(indexOfRightElement, 1)
             arrayCopy.length > 1 ? calculateByPriority(arrayCopy) : null
-            debugger
+            return {
+              den: arrayCopy[0].denominator,
+              num: arrayCopy[0].numerator,
+              isError: false
+            }
           } catch (e) {
-            self.isError = true
+            return {isError: true}
           }
-          self.den = arrayCopy[0].denominator
-          self.num = arrayCopy[0].numerator
-          self.isError = false
+
+        }
+
+        const findIndexByPriority = (currentPriority) => {
+          let calculatedPriority = currentPriority
+          let isElementsWithPriorityProvided = -1
+          while (calculatedPriority >= 0 && isElementsWithPriorityProvided === -1) {
+            isElementsWithPriorityProvided = arrayCopy.findIndex(el => el.operator.priority === calculatedPriority)
+            --calculatedPriority
+          }
+          return isElementsWithPriorityProvided
         }
 
         return calculateByPriority(arrayCopy)
-      },
-      createFraction(numerator, denominator) {
-        return new Fraction(parseInt(numerator), parseInt(denominator))
-      },
-      processAndValidateOperator(index, value) {
-        const foundedOperator = this.validOperatorsList.find(el => el.symbol === value)
-        this.fractionsList[index].operator = foundedOperator !== undefined ? foundedOperator : {symbol: null}
-      },
-      addNewFraction() {
-        this.fractionsList.push( Object.assign({}, this.fractionMockup))
       }
     },
-    created() {
-      // this.addNewFraction()
-      // this.addNewFraction()
-      this.calculationResult(this.fractionsList)
-    },
-    watch: {
-      fractionsList: {
-        handler(fractionsArray){
-          this.calculationResult(fractionsArray)
-        },
-        deep: true
+    methods: {
+      createFraction (numerator, denominator) {
+        return new Fraction(Number(numerator), Number(denominator))
+      },
+      processAndValidateOperator (index, value) {
+        const foundedOperator = this.validOperatorsList.find(el => el.symbol === value)
+        this.fractionsList[index].operator = foundedOperator !== undefined ? foundedOperator : {
+          symbol: null,
+          priority: 0
+        }
+      },
+      addNewFraction () {
+        this.fractionsList.push(Object.assign({}, this.fractionMockup))
       }
     }
   }
@@ -157,5 +170,12 @@
   .add-button-wrapper {
     position: absolute;
     bottom: 20px;
+  }
+  .equals{
+    height: 10px;
+    width: 15px;
+    margin: 0 10px;
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
   }
 </style>

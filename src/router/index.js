@@ -1,8 +1,9 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Index from '../components/routes'
 import Fractions from '../components/routes/Fractions'
 import Sockets from '../components/routes/Sockets'
+
+const Index = () => import('../components/routes')
 
 Vue.use(Router)
 
