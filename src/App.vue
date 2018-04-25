@@ -44,7 +44,7 @@
 
   .flex-container {
     height: 100%;
-    padding: 0;
+    padding: 20px;
     margin: 0;
     display: flex;
     align-items: center;
@@ -52,7 +52,7 @@
   }
 
   .home-link-wrapper {
-    position: absolute;
+    position: fixed;
     left: 20px;
     top: 20px;
   }
